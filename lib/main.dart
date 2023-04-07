@@ -20,9 +20,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DogProvider()),
       ],
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Ancha App',
         theme: ThemeData(
-          primarySwatch: Colors.amber,
+          primarySwatch: Colors.teal,
         ),
         home: const MyHomePage(),
       ),

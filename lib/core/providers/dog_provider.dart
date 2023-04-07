@@ -8,4 +8,8 @@ class DogProvider extends ChangeNotifier {
       .snapshots()
       .map((snapshot) =>
           snapshot.docs.map((doc) => Dog.fromJSON(doc.data())).toList());
+
+  Future<void> addDog(Dog dog) async {
+    await FirebaseFirestore.instance.collection('dogs').add(dog.toJSON());
+  }
 }

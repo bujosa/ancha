@@ -13,45 +13,107 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-// Add un list view with a list of items to the body of the scaffold, but this items have a card widget that contain a name and picture
 class _MyHomePageState extends State<MyHomePage> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _pictureController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final dogProvider = Provider.of<DogProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ancha App'),
+        title: const Text('Ancha',
+            style: TextStyle(color: Colors.white, fontSize: 30)),
+        centerTitle: true,
       ),
-      body: StreamBuilder<List<Dog>>(
-          stream: dogProvider.getDogs(),
-          builder: (context, snapshop) {
-            if (snapshop.hasData) {
-              return ListView.builder(
-                  itemCount: snapshop.data!.length,
-                  itemBuilder: (context, index) {
-                    return ItemWidget(
-                        name: snapshop.data![index].name,
-                        imageUrl: snapshop.data![index].picture);
-                  });
-            } else {
-              return const Center(child: CircularProgressIndicator());
-            }
-          }),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: StreamBuilder<List<Dog>>(
+            stream: dogProvider.getDogs(),
+            builder: (context, snapshop) {
+              if (snapshop.hasData) {
+                return ListView.builder(
+                    itemCount: snapshop.data!.length,
+                    itemBuilder: (context, index) {
+                      return ItemWidget(
+                          name: snapshop.data![index].name,
+                          imageUrl: snapshop.data![index].picture);
+                    });
+              } else {
+                return const Center(child: CircularProgressIndicator());
+              }
+            }),
+      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Add a dog'),
+                content: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Name',
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a name';
+                          }
+                          return null;
+                        },
+                      ),
+                      TextFormField(
+                        controller: _pictureController,
+                        decoration: const InputDecoration(
+                          labelText: 'Picture URL',
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a picture URL';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        final dog = Dog(
+                          name: _nameController.text.trim(),
+                          picture: _pictureController.text.trim(),
+                        );
+
+                        dogProvider.addDog(dog);
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    child: const Text('Add'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        tooltip: 'Add a dog',
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
 }
-
-// ListView(
-//         children: const <Widget>[
-//           ItemWidget(
-//               name: "Marinette",
-//               imageUrl:
-//                   "https://images.hola.com/imagenes/mascotas/20221020219416/razas-perros-toy/1-154-393/02-bichon-maltes-a.jpg?tx=w_360")
-//         ],
-// )
